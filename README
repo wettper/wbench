@@ -1,0 +1,2 @@
+gcc -Iinclude -lpthread -g src/wbench.c -o bin/wbench
+set args -t 10 http://127.0.0.1:8001
