@@ -5,24 +5,11 @@
 #define AI_SOCKTYPE SOCK_STREAM
 #define AI_PROTOCOL 0
 
-typedef struct {
-    char  *buffer;
-    size_t length;
-    char  *cursor;
-} buffer;
-
 typedef struct connection {
     thread *thread; 
     int fd;
     uint64_t start;
-    char *request;
-    size_t length;
-    size_t written;
-    uint64_t pending;
-    buffer headers;
-    buffer body;
     char buf[RECVBUF];
-
 } connection;
 
 int connect_socket(thread *thread)

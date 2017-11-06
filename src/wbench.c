@@ -22,6 +22,7 @@ int main(int argc, char **argv)
     char *service   = port ? port : schema;
 
     cfg.host = host;
+    cfg.port = port;
 
     signal(SIGPIPE, SIG_IGN);
 

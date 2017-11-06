@@ -30,6 +30,7 @@ static struct config {
     uint64_t threads;
     uint64_t timeout;
     char     *host;
+    char     *port;
 } cfg;
 
 #define RECVBUF     8192
