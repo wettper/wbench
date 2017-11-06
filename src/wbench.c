@@ -3,7 +3,6 @@
 #include "filter.h"
 #include "stats.h"
 #include "thread.h"
-#include "http.h"
 #include "socket.h"
 
 int main(int argc, char **argv)

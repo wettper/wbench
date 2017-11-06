@@ -29,12 +29,7 @@ static struct config {
     uint64_t duration;
     uint64_t threads;
     uint64_t timeout;
-    uint64_t pipeline;
-    bool     delay;
-    bool     dynamic; 
-    bool     latency; 
     char     *host;
-    char     *script;
 } cfg;
 
 #define RECVBUF     8192

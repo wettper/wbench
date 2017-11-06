@@ -251,9 +251,7 @@ static struct option longopts[] = {
     { "connections", required_argument, NULL, 'c' }
   , { "duration",    required_argument, NULL, 'd' }
   , { "threads",     required_argument, NULL, 't' }
-  , { "script",      required_argument, NULL, 's' }
   , { "header",      required_argument, NULL, 'H' }
-  , { "latency",     no_argument,       NULL, 'L' }
   , { "timeout",     required_argument, NULL, 'T' }
   , { "help",        no_argument,       NULL, 'h' }
   , { "version",     no_argument,       NULL, 'v' }
@@ -269,9 +267,7 @@ static void usage()
     printf("        -d, --duration      <T> Duration of test            \n");
     printf("        -t, --threads       <N> Number of threads to use    \n");
     printf("                                                            \n");
-    printf("        -s, --script        <S> Load Lua script file        \n");
     printf("        -H, --header        <H> Add header to request       \n");
-    printf("            --latency           Print latency statistics    \n");
     printf("            --timeout       <T> Socket/request timeout      \n");
     printf("        -v, --version       Print version details           \n");
     printf("                                                            \n");
@@ -304,14 +300,8 @@ static int parse_args(struct config *cfg, char **url, struct http_parser_url *pa
             case 'd':
                 if (scan_time(optarg, &cfg->duration)) return -1;
                 break;
-            case 's':
-                cfg->script = optarg;
-                break;
             case 'H':
                 *header++ = optarg;
-                break;
-            case 'L':
-                cfg->latency = true;
                 break;
             case 'T':
                 if (scan_time(optarg, &cfg->timeout)) return -1;
