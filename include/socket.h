@@ -1,37 +1,40 @@
 #ifndef SOCKET_H
 #define SOCKET_H
 
+#ifndef HAVE_STRING_H
+#define HAVE_STRING_H       1
+#include <string.h>
+#endif
+
+#ifndef HAVE_SYS_SOCKET_H
+#define HAVE_SYS_SOCKET_H   1
+#include <sys/socket.h>
+#endif
+
+#ifndef HAVE_ARPA_INET_H
+#define HAVE_ARPA_INET_H    1
+#include <arpa/inet.h>
+#endif
+
+#ifndef HAVE_NETINET_IN_H
+#define HAVE_NETINET_IN_H   1
+#include <netinet/in.h>
+#endif
+
 #define AI_FAMILY   AF_INET
 #define AI_SOCKTYPE SOCK_STREAM
 #define AI_PROTOCOL 0
 
-typedef struct connection {
-    thread *thread; 
+#include "config.h"
+#include "thread.h"
+
+typedef struct {
     int fd;
     uint64_t start;
+    uint64_t end;
     char buf[RECVBUF];
-} connection;
+} socket_info;
 
-int connect_socket(thread *thread)
-{
-    struct sockaddr_in addr = thread->addr;
-    int fd;
-    fd = socket(AI_FAMILY, AI_SOCKTYPE, AI_PROTOCOL);
-
-    char *str = "hello world";
-    char buf[RECVBUF] = {'\0'};
-
-    if (connect(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-        thread->errors.connect ++;
-        close(fd);
-        return -1;
-    }
-
-    send(fd, str, strlen(str) + 1, 0);
-    recv(fd, buf, RECVBUF, 0);
-
-    close(fd);
-    return fd;
-}
+//int connect_socket(thread *threads);
 
 #endif

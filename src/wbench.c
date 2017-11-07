@@ -1,9 +1,4 @@
 #include "wbench.h"
-#include "config.h"
-#include "filter.h"
-#include "stats.h"
-#include "thread.h"
-#include "socket.h"
 
 int main(int argc, char **argv)
 {
@@ -39,6 +34,7 @@ int main(int argc, char **argv)
         thread *t = &threads[i];
         t->connections = cfg.connections / cfg.threads;
         t->addr = server_addr_in;
+        t->start = time_us();
         if (pthread_create(&t->thread, NULL, &thread_main, t) != 0) {
             fprintf(stderr, "unabled to create thread: %"PRIu64" %s \n", i, strerror(errno));
             exit(2);

@@ -1,6 +1,11 @@
 #ifndef CONFIG_H 
 #define CONFIG_H
 
+#ifndef HAVE_INTTYPES_H
+#define HAVE_INTTYPES_H     1
+#include <inttypes.h>
+#endif
+
 //版本配置，后期从git分支信息获取
 //extern const char *VERSION;
 #define VERSION "1.0"
@@ -13,6 +18,7 @@
 
 typedef unsigned char       uint8_t;
 typedef unsigned short int  uint16_t;
+typedef unsigned int        uint32_t;
 #if __WORDSIZE == 64
 typedef unsigned long int   uint64_t;
 #else

@@ -1,6 +1,18 @@
 #ifndef STATS_H
 #define STATS_H
 
+#ifndef HAVE_STDIO_H
+#define HAVE_STDIO_H        1
+#include <stdio.h>
+#endif
+
+#ifndef HAVE_SYS_TIME_H
+#define HAVE_SYS_TIME_H        1
+#include <sys/time.h>
+#endif
+
+#include "config.h"
+
 typedef struct {
     uint32_t connect;
     uint32_t read;
@@ -9,11 +21,6 @@ typedef struct {
     uint32_t timeout;
 } errors;
 
-static uint64_t time_us()
-{
-    struct timeval t;
-    gettimeofday(&t, NULL);
-    return (t.tv_sec * 1000000) + t.tv_usec;
-}
+uint64_t time_us();
 
 #endif
