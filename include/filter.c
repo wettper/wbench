@@ -422,7 +422,6 @@ void usage()
     printf("Usage: wbench <options> <url>                               \n");
     printf("    Options:                                                \n");
     printf("        -c, --connection    <N> Connections to keep open    \n");
-    printf("        -d, --duration      <T> Duration of test            \n");
     printf("        -t, --threads       <N> Number of threads to use    \n");
     printf("                                                            \n");
     printf("        -H, --header        <H> Add header to request       \n");
@@ -444,7 +443,6 @@ int parse_args(struct config *cfg, char **url, struct http_parser_url *parts, ch
     memset(cfg, 0, sizeof(struct config));
     cfg->threads        = THREADS_DEFAULT;
     cfg->connections    = CONNECTIONS_DEFAULT;
-    cfg->duration       = DURATION_DEFAULT;
     cfg->timeout        = SOCKET_TIMEOUT_DEFAULT;
 
     while ((c = getopt_long(argc, argv, "t:c:d:s:H:T:Lrv?", longopts, NULL)) != -1) {
@@ -455,9 +453,6 @@ int parse_args(struct config *cfg, char **url, struct http_parser_url *parts, ch
             case 'c':
                 if (scan_metric(optarg, &cfg->connections)) return -1;
                 break;
-            case 'd':
-                if (scan_time(optarg, &cfg->duration)) return -1;
-                break;
             case 'H':
                 *header++ = optarg;
                 break;
@@ -466,8 +461,8 @@ int parse_args(struct config *cfg, char **url, struct http_parser_url *parts, ch
                 cfg->timeout *= 1000;
                 break;
             case 'v':
-                printf("wbench %s ", VERSION);
-                printf("Copyright (C) 2017 Wettper \n");
+                printf("This is Wbench, Version %s \n", VERSION);
+                printf("Copyright (C) 2017 Wettper, http://www.web-lovers.com \n");
                 break;
             case 'h':
             case '?':
@@ -477,7 +472,7 @@ int parse_args(struct config *cfg, char **url, struct http_parser_url *parts, ch
         }
     }
 
-    if (optind == argc || !cfg->threads || !cfg->duration)  return -1;
+    if (optind == argc || !cfg->threads)  return -1;
 
     if (!script_parse_url(argv[optind], parts)) {
         fprintf(stderr, "invalid URL: %s \n", argv[optind]);

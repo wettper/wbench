@@ -270,7 +270,6 @@ static const char tokens[256] = {
 /*过滤规则*/
 static struct option longopts[] = {
     { "connections", required_argument, NULL, 'c' }
-  , { "duration",    required_argument, NULL, 'd' }
   , { "threads",     required_argument, NULL, 't' }
   , { "header",      required_argument, NULL, 'H' }
   , { "timeout",     required_argument, NULL, 'T' }

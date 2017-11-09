@@ -28,7 +28,7 @@
 #include "config.h"
 #include "thread.h"
 
-typedef struct {
+typedef struct socket_info {
     int fd;
     uint64_t start;
     uint64_t end;

@@ -10,7 +10,8 @@ void *thread_main(void *arg)
     for (i; i < thread_info->connections; i ++) {
         socket_info *s = &socketinfo[i];
         s->start = time_us();
-        connect_socket(thread_info);
-        /*thread_info->socket_info = s;*/
+        connect_socket(thread_info, s);
+        s->end = time_us();
+        thread_info->socket_info = s;
     }
 }

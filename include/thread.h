@@ -15,7 +15,7 @@
 #include "stats.h"
 #include "socket.h"
 
-typedef struct {
+typedef struct thread {
     pthread_t thread;
     struct sockaddr_in addr;
     uint64_t connections;

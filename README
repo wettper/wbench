@@ -1,4 +1,4 @@
 Dedicated to stress testing that supports all web services
 
-gcc -Iinclude -lpthread -g src/wbench.c -o bin/wbench
+gcc -Iinclude -lpthread -g src/wbench.c include/*.c -o bin/wbench
 set args -t 10 http://127.0.0.1:8001

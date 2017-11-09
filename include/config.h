@@ -13,7 +13,6 @@
 //连接信息默认数据
 #define THREADS_DEFAULT         2
 #define CONNECTIONS_DEFAULT     10
-#define DURATION_DEFAULT        10
 #define SOCKET_TIMEOUT_DEFAULT  100
 
 typedef unsigned char       uint8_t;
@@ -32,7 +31,6 @@ typedef int bool;
 //连接配置
 static struct config {
     uint64_t connections;
-    uint64_t duration;
     uint64_t threads;
     uint64_t timeout;
     char     *host;

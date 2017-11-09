@@ -1,7 +1,9 @@
 #include "socket.h"
 
-int connect_socket(thread *threads)
+int connect_socket(thread *threads, socket_info *socketinfo)
 {
+    threads->complete ++;
+    
     struct sockaddr_in addr = threads->addr;
     int fd;
     fd = socket(AI_FAMILY, AI_SOCKTYPE, AI_PROTOCOL);
@@ -11,7 +13,7 @@ int connect_socket(thread *threads)
     }
 
     char *str = "hello world";
-    char buf[RECVBUF] = {'\0'};
+    char buf[RECVBUF] = {"\0"};
 
     if (connect(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
         threads->errors.connect ++;
@@ -23,6 +25,12 @@ int connect_socket(thread *threads)
     recv(fd, buf, RECVBUF, 0);
 
     close(fd);
+
+    socketinfo->fd = fd;
+    strcpy(socketinfo->buf, buf);
+
+    threads->requests ++;
+    threads->bytes += sizeof(buf);
 
     return fd;
 }
