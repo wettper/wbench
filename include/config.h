@@ -28,15 +28,17 @@ typedef int bool;
 #define true 1
 #define false 0
 
+#define RECVBUF     8192
+#define REQUBUF     8192
+
 //连接配置
 static struct config {
     uint64_t connections;
     uint64_t threads;
     uint64_t timeout;
+    char     data[REQUBUF];
     char     *host;
     char     *port;
 } cfg;
-
-#define RECVBUF     8192
 
 #endif  /*CONFIG_H*/

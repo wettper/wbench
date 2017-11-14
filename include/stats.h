@@ -23,4 +23,6 @@ typedef struct {
 
 uint64_t time_us();
 
+int compare_fun(const void *param1, const void *param2);
+
 #endif

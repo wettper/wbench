@@ -288,7 +288,7 @@ typedef struct {
 void usage();
 
 /*参数过滤*/
-int parse_args(struct config *cfg, char **url, struct http_parser_url *parts, char **headers, 
+int parse_args(struct config *cfg, char **url, struct http_parser_url *parts, 
         int argc, char **argv);
 
 char *copy_url_part(char *url, struct http_parser_url *parts, 

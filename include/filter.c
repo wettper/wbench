@@ -424,7 +424,7 @@ void usage()
     printf("        -c, --connection    <N> Connections to keep open    \n");
     printf("        -t, --threads       <N> Number of threads to use    \n");
     printf("                                                            \n");
-    printf("        -H, --header        <H> Add header to request       \n");
+    printf("        -d, --data          <H> Add data to request         \n");
     printf("            --timeout       <T> Socket/request timeout      \n");
     printf("        -v, --version       Print version details           \n");
     printf("                                                            \n");
@@ -433,11 +433,10 @@ void usage()
 }
 
 /*参数过滤*/
-int parse_args(struct config *cfg, char **url, struct http_parser_url *parts, char **headers, 
+int parse_args(struct config *cfg, char **url, struct http_parser_url *parts, 
         int argc, char **argv)
 {
     int c;
-    char **header = headers;
 
     /*申请配置*/
     memset(cfg, 0, sizeof(struct config));
@@ -453,8 +452,8 @@ int parse_args(struct config *cfg, char **url, struct http_parser_url *parts, ch
             case 'c':
                 if (scan_metric(optarg, &cfg->connections)) return -1;
                 break;
-            case 'H':
-                *header++ = optarg;
+            case 'd':
+                strcpy(cfg->data, optarg);
                 break;
             case 'T':
                 if (scan_time(optarg, &cfg->timeout)) return -1;
@@ -485,7 +484,6 @@ int parse_args(struct config *cfg, char **url, struct http_parser_url *parts, ch
     }
 
     *url = argv[optind];
-    *header = NULL;
 
     return 0;
 
