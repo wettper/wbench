@@ -238,16 +238,16 @@ static const char tokens[256] = {
 
 #ifndef BIT_AT
 # define BIT_AT(a, i)                                                \
-  (!!((unsigned int) (a)[(unsigned int) (i) >> 3] &                  \
-   (1 << ((unsigned int) (i) & 7))))
+  (!!((uint32_t) (a)[(uint32_t) (i) >> 3] &                  \
+   (1 << ((uint32_t) (i) & 7))))
 #endif
 
 #ifndef ELEM_AT
-# define ELEM_AT(a, i, v) ((unsigned int) (i) < ARRAY_SIZE(a) ? (a)[(i)] : (v))
+# define ELEM_AT(a, i, v) ((uint32_t) (i) < ARRAY_SIZE(a) ? (a)[(i)] : (v))
 #endif
 #define CR                  '\r'
 #define LF                  '\n'
-#define LOWER(c)            (unsigned char)(c | 0x20)
+#define LOWER(c)            (uint8_t)(c | 0x20)
 #define IS_ALPHA(c)         (LOWER(c) >= 'a' && LOWER(c) <= 'z') 
 #define IS_NUM(c)           ((c) >= '0' && (c) <= '9')
 #define IS_ALPHANUM(c)      (IS_ALPHA(c) || IS_NUM(c))
@@ -259,10 +259,10 @@ static const char tokens[256] = {
           (c) == ';' || (c) == ':' || (c) == '&' || (c) == '=' || (c) == '+' || \
           (c) == '$' || (c) == ',')
 
-#define STRICT_TOKEN(c)     (tokens[(unsigned char)c])
+#define STRICT_TOKEN(c)     (tokens[(uint8_t)c])
 
-#define TOKEN(c)            (tokens[(unsigned char)c])
-#define IS_URL_CHAR(c)      (BIT_AT(normal_url_char, (unsigned char)c))
+#define TOKEN(c)            (tokens[(uint8_t)c])
+#define IS_URL_CHAR(c)      (BIT_AT(normal_url_char, (uint8_t)c))
 #define IS_HOST_CHAR(c)     (IS_ALPHANUM(c) || (c) == '.' || (c) == '-')
 
 

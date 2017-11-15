@@ -6,6 +6,11 @@
 #include <string.h>
 #endif
 
+#ifndef HAVE_FCNTL_H
+#define HAVE_FCNTL_H        1
+#include <fcntl.h>
+#endif
+
 #ifndef HAVE_SYS_SOCKET_H
 #define HAVE_SYS_SOCKET_H   1
 #include <sys/socket.h>

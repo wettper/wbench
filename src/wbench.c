@@ -35,7 +35,10 @@ int main(int argc, char **argv)
         thread *t = &threads[i];
         t->connections = cfg.connections / cfg.threads;
         t->addr = server_addr_in;
+        t->host = host;
+        t->port = service;
         t->start = time_us();
+        t->timeout = cfg.timeout;
         strcpy(t->params, cfg.data);
         if (pthread_create(&t->thread, NULL, &thread_main, t) != 0) {
             fprintf(stderr, "unabled to create thread: %"PRIu64" %s \n", i, strerror(errno));
@@ -91,6 +94,8 @@ int main(int argc, char **argv)
     printf("Finished %3"PRIu64" requests \n", complete);
     printf("\n");
     printf("\n");
+
+    return 0;
 
     printf("Server Hostname: %16s \n", host);
     printf("Server Port: %15s \n", port);

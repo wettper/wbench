@@ -15,6 +15,8 @@
 #define CONNECTIONS_DEFAULT     10
 #define SOCKET_TIMEOUT_DEFAULT  100
 
+#define SOCKET_SHAKE_KEY_LEN    16 
+
 typedef unsigned char       uint8_t;
 typedef unsigned short int  uint16_t;
 typedef unsigned int        uint32_t;

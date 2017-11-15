@@ -18,7 +18,10 @@
 typedef struct thread {
     pthread_t thread;
     struct sockaddr_in addr;
+    char     *host;
+    char     *port;
     char     params[REQUBUF];
+    uint64_t timeout;
     uint64_t connections;
     uint64_t complete;
     uint64_t requests;
