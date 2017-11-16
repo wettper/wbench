@@ -33,6 +33,9 @@ int main(int argc, char **argv)
     uint64_t i = 0;
     for (i; i < cfg.threads; i ++) {
         thread *t = &threads[i];
+        printf("connections: %d \n", cfg.connections);
+        printf("threads: %d \n", cfg.threads);
+        printf("c: %d \n", cfg.connections / cfg.threads);
         t->connections = cfg.connections / cfg.threads;
         t->addr = server_addr_in;
         t->host = host;

@@ -360,6 +360,77 @@ int w_serverToClient(int fd, char *recvBuf, unsigned int bufLen)
     return send(fd, respondPackage, strlen(respondPackage), MSG_NOSIGNAL);
 }
 
+static int w_clientToServer(thread *threads)
+{
+    struct sockaddr_in addr = threads->addr;
+    int fd, ret, timeout;
+    char buf[RECVBUF] = {"\0"}, *p;
+    /*协议内容*/
+    uint8_t shakeBuf[512] = {"\0"}, shakeKey[128] = {"\0"};
+
+    fd = socket(AI_FAMILY, AI_SOCKTYPE, AI_PROTOCOL);
+    if (fd < 0) {
+        return -1;
+    }
+
+    /*非阻塞*/
+    ret = fcntl(fd, F_SETFL, 0);
+    fcntl(fd, F_SETFL, ret | O_NONBLOCK);
+
+    timeout = 0;
+    while (connect(fd, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
+        if (++timeout > threads->timeout) {
+            printf("connect timeout! \n");
+            close(fd);
+            return -1;
+        }
+        delayms(1);
+    }
+
+    /*握手key*/
+    memset(shakeKey, 0, sizeof(shakeKey));
+    build_shakeKey(shakeKey);
+    /*协议包*/
+    memset(shakeBuf, 0, sizeof(shakeBuf));
+    build_header(threads->host, threads->port, "/null", shakeKey, (char *)shakeBuf);
+    /*发送协议包*/
+    ret = send(fd, shakeBuf, strlen((const char *)shakeBuf), MSG_NOSIGNAL);
+
+    /*握手*/
+    while(true) {
+        memset(buf, 0, sizeof(buf));
+        ret = recv(fd, buf, sizeof(buf), MSG_NOSIGNAL);
+        if (ret > 0) {
+            /*判断是不是HTTP协议头*/
+            if (strncmp((const char *)buf, (const char *)"HTTP", strlen((const char *)"HTTP")) == 0) {
+                /*检验握手信号*/
+                if ((p = (uint8_t *)strstr((const char*)buf, (const char *)"Sec-WebSocket-Accept: ")) != NULL) {
+                    p += strlen((const char *)"Sec-WebSocket-Accept: "); 
+                    sscanf((const char *)p, "%s\r\n", p);
+                    /*握手成功*/
+                    if (match_shakeKey(shakeKey, strlen((const char*)shakeKey), p, strlen((const char *)p)) == 0) {
+                        return fd;
+                    } else {
+                        /*握手不对，重新发送协议包*/
+                        ret = send(fd, shakeBuf, strlen((const char *)shakeBuf), MSG_NOSIGNAL);
+                    }
+                } else {
+                    ret = send(fd, shakeBuf, strlen((const char *)shakeBuf), MSG_NOSIGNAL);
+                }
+            }
+        }
+        if (++timeout > threads->timeout) {
+            printf("shake timeout! \n");
+            threads->errors.connect ++;
+            close(fd);
+            return -1;
+        }
+        delayms(1);
+
+        return -1;
+    }
+}
+
 /*******************************************************************************
  * 名称: w_send
  * 功能: websocket数据基本打包和发送
@@ -449,79 +520,17 @@ int connect_socket(thread *threads, socket_info *socketinfo)
 {
     threads->complete ++;
 
-    struct sockaddr_in addr = threads->addr;
     int fd, ret, timeout;
     char buf[RECVBUF] = {"\0"}, send_text[REQUBUF] = "wbench testing", *p;
-    /*协议内容*/
-    uint8_t shakeBuf[512] = {"\0"}, shakeKey[128] = {"\0"};
 
+    fd = w_clientToServer(threads);
+    printf("fd: %d \n", fd);
 
-    fd = socket(AI_FAMILY, AI_SOCKTYPE, AI_PROTOCOL);
-    if (fd < 0) {
-        threads->errors.connect ++;
-        return -1;
-    }
     socketinfo->fd = fd;
 
-    /*非阻塞*/
-    ret = fcntl(fd, F_SETFL, 0);
-    fcntl(fd, F_SETFL, ret | O_NONBLOCK);
-
-    timeout = 0;
-    while (connect(fd, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
-        if (++timeout > threads->timeout) {
-            printf("connect timeout! \n");
-            threads->errors.connect ++;
-            close(fd);
-            return -1;
-        }
-        delayms(1);
-    }
-
-    /*握手key*/
-    memset(shakeKey, 0, sizeof(shakeKey));
-    build_shakeKey(shakeKey);
-    /*协议包*/
-    memset(shakeBuf, 0, sizeof(shakeBuf));
-    build_header(threads->host, threads->port, "/null", shakeKey, (char *)shakeBuf);
-    /*发送协议包*/
-    ret = send(fd, shakeBuf, strlen((const char *)shakeBuf), MSG_NOSIGNAL);
-
-    /*握手*/
-    while(true) {
-        memset(buf, 0, sizeof(buf));
-        ret = recv(fd, buf, sizeof(buf), MSG_NOSIGNAL);
-        if (ret > 0) {
-            /*判断是不是HTTP协议头*/
-            if (strncmp((const char *)buf, (const char *)"HTTP", strlen((const char *)"HTTP")) == 0) {
-                /*检验握手信号*/
-                if ((p = (uint8_t *)strstr((const char*)buf, (const char *)"Sec-WebSocket-Accept: ")) != NULL) {
-                    p += strlen((const char *)"Sec-WebSocket-Accept: "); 
-                    sscanf((const char *)p, "%s\r\n", p);
-                    /*握手成功*/
-                    if (match_shakeKey(shakeKey, strlen((const char*)shakeKey), p, strlen((const char *)p)) == 0) {
-                        return fd;
-                    } else {
-                        /*握手不对，重新发送协议包*/
-                        ret = send(fd, shakeBuf, strlen((const char *)shakeBuf), MSG_NOSIGNAL);
-                    }
-                } else {
-                    ret = send(fd, shakeBuf, strlen((const char *)shakeBuf), MSG_NOSIGNAL);
-                }
-            }
-        }
-        if (++timeout > threads->timeout) {
-            printf("shake timeout! \n");
-            threads->errors.connect ++;
-            close(fd);
-            return -1;
-        }
-        delayms(1);
-    }
     if (threads->params[0] != '\0') {
         strcpy(send_text, threads->params); 
     }
-
 
     /*send(fd, send_text, strlen(send_text) + 1, 0);*/
     /*recv(fd, buf, RECVBUF, 0);*/
