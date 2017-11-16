@@ -48,6 +48,14 @@ static int match_shakeKey(uint8_t *myKey, uint32_t myKeyLen, uint8_t *acceptKey,
     uint8_t tempKey[256] = {"\0"};
 
     retLen = build_respon_shakeKey(myKey, myKeyLen, tempKey);
+
+    if(retLen != acceptKeyLen) {
+        return -1;
+    } else if(strcmp((const char *)tempKey, (const char *)acceptKey) != 0) {
+        return -1;
+    }
+
+    return 0;
 }
 
 static void build_header(char *ip, char *port, char *query_path, uint8_t *shakeKey, char *package)
