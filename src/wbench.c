@@ -44,7 +44,6 @@ int main(int argc, char **argv)
             fprintf(stderr, "unabled to create thread: %"PRIu64" %s \n", i, strerror(errno));
             exit(2);
         } 
-        /*printf("i: %"PRIu64"\n", i);*/
     }
 
     uint64_t complete = 0;
@@ -94,8 +93,6 @@ int main(int argc, char **argv)
     printf("Finished %3"PRIu64" requests \n", complete);
     printf("\n");
     printf("\n");
-
-    return 0;
 
     printf("Server Hostname: %16s \n", host);
     printf("Server Port: %15s \n", port);

@@ -546,8 +546,7 @@ int connect_socket(thread *threads, socket_info *socketinfo)
         memset(buf, 0, sizeof(buf));
         ret = w_recv(fd, buf, sizeof(buf));
         if (++timeout > threads->timeout) {
-            close(fd);
-            return -1;
+            break;
         }
         delayms(1);
     }
