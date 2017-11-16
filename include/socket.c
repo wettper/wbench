@@ -532,7 +532,6 @@ int connect_socket(thread *threads, socket_info *socketinfo)
     char buf[RECVBUF] = {"\0"}, send_text[REQUBUF] = "wbench testing", *p;
 
     fd = w_clientToServer(threads);
-    printf("fd: %d \n", fd);
 
     socketinfo->fd = fd;
 
