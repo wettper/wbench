@@ -2,3 +2,7 @@ Dedicated to stress testing that supports all web services
 
 gcc -Iinclude -lpthread -g src/wbench.c include/*.c -o bin/wbench
 set args -t 10 http://127.0.0.1:8001
+
+待办: 
+1. 所有注释整理一遍, 包括 函数注释/行注释 等
+2. 所有函数的风格, 用下划线或者用驼峰进行区分
