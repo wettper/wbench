@@ -20,7 +20,7 @@ void delayms(uint32_t ms)
     select(0, NULL, NULL, NULL, &t);
 }
 
-void getRandomString(uint8_t *buf, uint32_t len)
+void get_random_string(uint8_t *buf, uint32_t len)
 {
     uint32_t i;
     uint8_t temp;
@@ -34,18 +34,19 @@ void getRandomString(uint8_t *buf, uint32_t len)
     }
 }
 
-//base64编/解码用的基础字符集
+/*base64编/解码用的基础字符集*/
 const char base64char[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-/*******************************************************************************
- * 名称: base64_encode
- * 功能: ascii编码为base64格式
- * 形参: bindata : ascii字符串输入
- *            base64 : base64字符串输出
- *          binlength : bindata的长度
- * 返回: base64字符串长度
- * 说明: 无
- ******************************************************************************/
+/**
+ * ascii编码为base64格式
+ *
+ * @param const uint8_t bindata     ascii字符串输入
+ * @param char          base64      base64字符串输出
+ * @param int           binlength   bindata的长度
+ *
+ * @return int          base64字符串长度
+ *
+ */
 int base64_encode( const uint8_t *bindata, char *base64, int binlength)
 {
     int i, j;
@@ -80,14 +81,16 @@ int base64_encode( const uint8_t *bindata, char *base64, int binlength)
     base64[j] = '\0';
     return j;
 }
-/*******************************************************************************
- * 名称: base64_decode
- * 功能: base64格式解码为ascii
- * 形参: base64 : base64字符串输入
- *            bindata : ascii字符串输出
- * 返回: 解码出来的ascii字符串长度
- * 说明: 无
- ******************************************************************************/
+
+/**
+ * base64格式解码为ascii
+ *
+ * @param const char    *base64     base64字符串输入
+ * @param uint8_t       *bindata    ascii字符串输出
+ * 
+ * @return int          解码出来的ascii字符串长度
+ *
+ */
 int base64_decode( const char *base64, uint8_t *bindata)
 {
     int i, j;
@@ -130,153 +133,153 @@ int base64_decode( const char *base64, uint8_t *bindata)
     return j;
 }
 
-static void SHA1ProcessMessageBlock(SHA1Context *context)
+static void sha1_process_message_block(sha1_context *context)
 {
-    const unsigned K[] = {0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xCA62C1D6 };
+    const unsigned k[] = {0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xCA62C1D6 };
     int         t;
     unsigned    temp;
-    unsigned    W[80];
-    unsigned    A, B, C, D, E;
+    unsigned    w[80];
+    unsigned    a, b, c, d, e;
 
     for(t = 0; t < 16; t++) {
-        W[t] = ((unsigned) context->Message_Block[t * 4]) << 24;
-        W[t] |= ((unsigned) context->Message_Block[t * 4 + 1]) << 16;
-        W[t] |= ((unsigned) context->Message_Block[t * 4 + 2]) << 8;
-        W[t] |= ((unsigned) context->Message_Block[t * 4 + 3]);
+        w[t] = ((unsigned) context->message_block[t * 4]) << 24;
+        w[t] |= ((unsigned) context->message_block[t * 4 + 1]) << 16;
+        w[t] |= ((unsigned) context->message_block[t * 4 + 2]) << 8;
+        w[t] |= ((unsigned) context->message_block[t * 4 + 3]);
     }
 
     for(t = 16; t < 80; t++)
-        W[t] = SHA1CircularShift(1,W[t-3] ^ W[t-8] ^ W[t-14] ^ W[t-16]);
+        w[t] = sha1_circular_shift(1, w[t-3] ^ w[t-8] ^ w[t-14] ^ w[t-16]);
 
-    A = context->Message_Digest[0];
-    B = context->Message_Digest[1];
-    C = context->Message_Digest[2];
-    D = context->Message_Digest[3];
-    E = context->Message_Digest[4];
+    a = context->message_digest[0];
+    b = context->message_digest[1];
+    c = context->message_digest[2];
+    d = context->message_digest[3];
+    e = context->message_digest[4];
     
     for(t = 0; t < 20; t++) {
-        temp =  SHA1CircularShift(5,A) + ((B & C) | ((~B) & D)) + E + W[t] + K[0];
+        temp =  sha1_circular_shift(5, a) + ((b & c) | ((~b) & d)) + e + w[t] + k[0];
         temp &= 0xFFFFFFFF;
-        E = D;
-        D = C;
-        C = SHA1CircularShift(30,B);
-        B = A;
-        A = temp;  
+        e = d;
+        d = c;
+        c = sha1_circular_shift(30, b);
+        b = a;
+        a = temp;  
     }
     
     for(t = 20; t < 40; t++) {
-        temp = SHA1CircularShift(5,A) + (B ^ C ^ D) + E + W[t] + K[1];
+        temp = sha1_circular_shift(5, a) + (b ^ c ^ d) + e + w[t] + k[1];
         temp &= 0xFFFFFFFF;
-        E = D;
-        D = C;
-        C = SHA1CircularShift(30,B);
-        B = A;
-        A = temp;
+        e = d;
+        d = c;
+        c = sha1_circular_shift(30, b);
+        b = a;
+        a = temp;
     }
     
     for(t = 40; t < 60; t++) {
-        temp = SHA1CircularShift(5,A) + ((B & C) | (B & D) | (C & D)) + E + W[t] + K[2];
+        temp = sha1_circular_shift(5, a) + ((b & c) | (b & d) | (c & d)) + e + w[t] + k[2];
         temp &= 0xFFFFFFFF;
-        E = D;
-        D = C;
-        C = SHA1CircularShift(30,B);
-        B = A;
-        A = temp;
+        e = d;
+        d = c;
+        c = sha1_circular_shift(30, b);
+        b = a;
+        a = temp;
     }
     
     for(t = 60; t < 80; t++) {  
-        temp = SHA1CircularShift(5,A) + (B ^ C ^ D) + E + W[t] + K[3];
+        temp = sha1_circular_shift(5, a) + (b ^ c ^ d) + e + w[t] + k[3];
         temp &= 0xFFFFFFFF;
-        E = D;
-        D = C;
-        C = SHA1CircularShift(30,B);
-        B = A;
-        A = temp;
+        e = d;
+        d = c;
+        c = sha1_circular_shift(30, b);
+        b = a;
+        a = temp;
     }
-    context->Message_Digest[0] = (context->Message_Digest[0] + A) & 0xFFFFFFFF;
-    context->Message_Digest[1] = (context->Message_Digest[1] + B) & 0xFFFFFFFF;
-    context->Message_Digest[2] = (context->Message_Digest[2] + C) & 0xFFFFFFFF;
-    context->Message_Digest[3] = (context->Message_Digest[3] + D) & 0xFFFFFFFF;
-    context->Message_Digest[4] = (context->Message_Digest[4] + E) & 0xFFFFFFFF;
-    context->Message_Block_Index = 0;
+    context->message_digest[0] = (context->message_digest[0] + a) & 0xFFFFFFFF;
+    context->message_digest[1] = (context->message_digest[1] + b) & 0xFFFFFFFF;
+    context->message_digest[2] = (context->message_digest[2] + c) & 0xFFFFFFFF;
+    context->message_digest[3] = (context->message_digest[3] + d) & 0xFFFFFFFF;
+    context->message_digest[4] = (context->message_digest[4] + e) & 0xFFFFFFFF;
+    context->message_block_index = 0;
 }
 
-static void SHA1Reset(SHA1Context *context)
+static void sha1_reset(sha1_context *context)
 {
-    context->Length_Low             = 0;
-    context->Length_High            = 0;
-    context->Message_Block_Index    = 0;
+    context->length_low             = 0;
+    context->length_high            = 0;
+    context->message_block_index    = 0;
 
-    context->Message_Digest[0]      = 0x67452301;
-    context->Message_Digest[1]      = 0xEFCDAB89;
-    context->Message_Digest[2]      = 0x98BADCFE;
-    context->Message_Digest[3]      = 0x10325476;
-    context->Message_Digest[4]      = 0xC3D2E1F0;
+    context->message_digest[0]      = 0x67452301;
+    context->message_digest[1]      = 0xEFCDAB89;
+    context->message_digest[2]      = 0x98BADCFE;
+    context->message_digest[3]      = 0x10325476;
+    context->message_digest[4]      = 0xC3D2E1F0;
 
-    context->Computed   = 0;
-    context->Corrupted  = 0;
+    context->computed   = 0;
+    context->corrupted  = 0;
 }  
 
-static void SHA1PadMessage(SHA1Context *context)
+static void sha1_pad_message(sha1_context *context)
 {
-    if (context->Message_Block_Index > 55) {
-        context->Message_Block[context->Message_Block_Index++] = 0x80;
-        while(context->Message_Block_Index < 64)  context->Message_Block[context->Message_Block_Index++] = 0;
-        SHA1ProcessMessageBlock(context);
-        while(context->Message_Block_Index < 56) context->Message_Block[context->Message_Block_Index++] = 0;
+    if (context->message_block_index > 55) {
+        context->message_block[context->message_block_index++] = 0x80;
+        while(context->message_block_index < 64)  context->message_block[context->message_block_index++] = 0;
+        sha1_process_message_block(context);
+        while(context->message_block_index < 56) context->message_block[context->message_block_index++] = 0;
     } else {
-        context->Message_Block[context->Message_Block_Index++] = 0x80;
-        while(context->Message_Block_Index < 56) context->Message_Block[context->Message_Block_Index++] = 0;
+        context->message_block[context->message_block_index++] = 0x80;
+        while(context->message_block_index < 56) context->message_block[context->message_block_index++] = 0;
     }
-    context->Message_Block[56] = (context->Length_High >> 24 ) & 0xFF;
-    context->Message_Block[57] = (context->Length_High >> 16 ) & 0xFF;
-    context->Message_Block[58] = (context->Length_High >> 8 ) & 0xFF;
-    context->Message_Block[59] = (context->Length_High) & 0xFF;
-    context->Message_Block[60] = (context->Length_Low >> 24 ) & 0xFF;
-    context->Message_Block[61] = (context->Length_Low >> 16 ) & 0xFF;
-    context->Message_Block[62] = (context->Length_Low >> 8 ) & 0xFF;
-    context->Message_Block[63] = (context->Length_Low) & 0xFF;
+    context->message_block[56] = (context->length_high >> 24 ) & 0xFF;
+    context->message_block[57] = (context->length_high >> 16 ) & 0xFF;
+    context->message_block[58] = (context->length_high >> 8 ) & 0xFF;
+    context->message_block[59] = (context->length_high) & 0xFF;
+    context->message_block[60] = (context->length_low >> 24 ) & 0xFF;
+    context->message_block[61] = (context->length_low >> 16 ) & 0xFF;
+    context->message_block[62] = (context->length_low >> 8 ) & 0xFF;
+    context->message_block[63] = (context->length_low) & 0xFF;
 
-    SHA1ProcessMessageBlock(context);
+    sha1_process_message_block(context);
 } 
 
-static int SHA1Result(SHA1Context *context)
+static int sha1_result(sha1_context *context)
 {
-    if (context->Corrupted) {
+    if (context->corrupted) {
         return 0;
     }
     
-    if (!context->Computed) {
-        SHA1PadMessage(context);
-        context->Computed = 1;
+    if (!context->computed) {
+        sha1_pad_message(context);
+        context->computed = 1;
     }
     return 1;
 }
 
-static void SHA1Input(SHA1Context *context,const char *message_array,unsigned length)
+static void sha1_input(sha1_context *context, const char *message_array, unsigned length)
 {
     if (!length)
         return;
     
-    if (context->Computed || context->Corrupted) {
-        context->Corrupted = 1;
+    if (context->computed || context->corrupted) {
+        context->corrupted = 1;
         return;
     }
     
-    while(length-- && !context->Corrupted) {
-        context->Message_Block[context->Message_Block_Index++] = (*message_array & 0xFF);
+    while(length-- && !context->corrupted) {
+        context->message_block[context->message_block_index++] = (*message_array & 0xFF);
 
-        context->Length_Low += 8;
-        context->Length_Low &= 0xFFFFFFFF;
+        context->length_low += 8;
+        context->length_low &= 0xFFFFFFFF;
 
-        if (context->Length_Low == 0) {
-            context->Length_High++;
-            context->Length_High &= 0xFFFFFFFF;
-            if (context->Length_High == 0) context->Corrupted = 1;
+        if (context->length_low == 0) {
+            context->length_high++;
+            context->length_high &= 0xFFFFFFFF;
+            if (context->length_high == 0) context->corrupted = 1;
         }
         
-        if (context->Message_Block_Index == 64) {
-            SHA1ProcessMessageBlock(context);
+        if (context->message_block_index == 64) {
+            sha1_process_message_block(context);
         }
         message_array++;
     }
@@ -284,20 +287,20 @@ static void SHA1Input(SHA1Context *context,const char *message_array,unsigned le
 
 char * sha1_hash(const char *source)
 {
-    SHA1Context sha;
+    sha1_context sha;
     char *buf;
     
-    SHA1Reset(&sha);
-    SHA1Input(&sha, source, strlen(source));
+    sha1_reset(&sha);
+    sha1_input(&sha, source, strlen(source));
     
-    if (!SHA1Result(&sha)) {
+    if (!sha1_result(&sha)) {
         printf("SHA1 ERROR: Could not compute message digest");
         return NULL;
     } else {
         buf = (char *)malloc(128);
         memset(buf, 0, 128);
-        sprintf(buf, "%08X%08X%08X%08X%08X", sha.Message_Digest[0],sha.Message_Digest[1],
-                sha.Message_Digest[2],sha.Message_Digest[3],sha.Message_Digest[4]);
+        sprintf(buf, "%08X%08X%08X%08X%08X", sha.message_digest[0], sha.message_digest[1],
+                sha.message_digest[2],sha.message_digest[3], sha.message_digest[4]);
         return buf;
     }
 }

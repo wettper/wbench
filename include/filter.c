@@ -176,7 +176,7 @@ static enum http_host_state http_parse_host_char(enum http_host_state s, const c
                 return s_http_host;
             }
             
-            /* FALLTHROUGH */
+        /* FALLTHROUGH */
         case s_http_host_v6_end:
             if (ch == ':') {
                 return s_http_host_port_start;
@@ -189,7 +189,7 @@ static enum http_host_state http_parse_host_char(enum http_host_state s, const c
                 return s_http_host_v6_end;
             }
             
-            /* FALLTHROUGH */
+        /* FALLTHROUGH */
         case s_http_host_v6_start:
             if (IS_HEX(ch) || ch == ':' || ch == '.') {
                 return s_http_host_v6;
@@ -444,7 +444,7 @@ int parse_args(struct config *cfg, char **url, struct http_parser_url *parts,
     cfg->connections    = CONNECTIONS_DEFAULT;
     cfg->timeout        = SOCKET_TIMEOUT_DEFAULT;
 
-    while ((c = getopt_long(argc, argv, "t:c:d:s:H:T:Lrv?", longopts, NULL)) != -1) {
+    while ((c = getopt_long(argc, argv, "t:c:d:T:v:h:?", longopts, NULL)) != -1) {
         switch (c) {
             case 't':
                 if (scan_metric(optarg, &cfg->threads)) return -1;

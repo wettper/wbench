@@ -3,7 +3,7 @@
 int main(int argc, char **argv)
 {
     uint64_t start = time_us();
-    char *url = calloc(1, argc * sizeof(char *));
+    char *url = calloc(argc, sizeof(char *));
     struct http_parser_url parts = {};
 
     /*参数过滤*/
@@ -22,7 +22,7 @@ int main(int argc, char **argv)
 
     signal(SIGPIPE, SIG_IGN);
 
-    thread *threads = calloc(1, cfg.threads * sizeof(thread));
+    thread *threads = calloc(cfg.threads, sizeof(thread));
     
     struct sockaddr_in server_addr_in;
     bzero(&server_addr_in, sizeof(server_addr_in));
@@ -114,20 +114,9 @@ int main(int argc, char **argv)
     printf("Transfer rate: \t\t%.3f [Kbytes/sec] received \n", bytes_per_s);
     printf("\n");
 
-    /*printf("Connection Times (ms)\n");*/
-    /*printf("\t\tmin\tmean[+/-sd]\tmedian\tmax\n");*/
-    /*printf("Connect:\t0\t0\t0.4\t0\t6\n");*/
-    /*printf("Processing:\t4\t14\t2.0\t14\t41\n");*/
-    /*printf("Waiting:\t0\t14\t2.0\t14\t41\n");*/
-    /*printf("Total:\t\t5\t15\t1.9\t15\t42\n");*/
-
     printf("\n");
 
     qsort(connect_times, cfg.connections, sizeof(uint64_t), compare_fun);
-    /*uint64_t n = 0;*/
-    /*for (n; n < cfg.connections; n ++) {*/
-        /*printf("connect_times: %"PRIu64" \n", connect_times[n]);*/
-    /*}*/
     printf("Percentage of the requests served within a certain time (ms) \n");
     printf("  50%\t%"PRIu64" \n", connect_times[(uint64_t)(cfg.connections * 0.5 - 1)]);
     printf("  66%\t%"PRIu64" \n", connect_times[(uint64_t)(cfg.connections * 0.66 - 1)]);

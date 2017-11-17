@@ -31,17 +31,17 @@ typedef struct {
     uint32_t timeout;
 } errors;
 
-typedef struct SHA1Context{  
-    unsigned Message_Digest[5];        
-    unsigned Length_Low;               
-    unsigned Length_High;              
-    unsigned char Message_Block[64];   
-    int Message_Block_Index;           
-    int Computed;                      
-    int Corrupted;                     
-} SHA1Context;  
+typedef struct sha1_context{  
+    unsigned message_digest[5];        
+    unsigned length_low;               
+    unsigned length_high;              
+    uint8_t message_block[64];   
+    int message_block_index;           
+    int computed;                      
+    int corrupted;                     
+} sha1_context;  
 
-#define SHA1CircularShift(bits,word) ((((word) << (bits)) & 0xFFFFFFFF) | ((word) >> (32-(bits))))  
+#define sha1_circular_shift(bits,word) ((((word) << (bits)) & 0xFFFFFFFF) | ((word) >> (32-(bits))))  
 
 
 uint64_t time_us();
@@ -50,7 +50,7 @@ int compare_fun(const void *param1, const void *param2);
 
 void delayms(uint32_t ms);
 
-void getRandomString(uint8_t *buf, uint32_t len);
+void get_random_string(uint8_t *buf, uint32_t len);
 
 int base64_encode(const uint8_t *bindata, char *base64, int binlength);
 
