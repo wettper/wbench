@@ -15,7 +15,17 @@ int main(int argc, char **argv)
     char *schema    = copy_url_part(url, &parts, UF_SCHEMA);
     char *host      = copy_url_part(url, &parts, UF_HOST);
     char *port      = copy_url_part(url, &parts, UF_PORT);
+    char *path      = copy_url_part(url, &parts, UF_PATH);
+    char *query     = copy_url_part(url, &parts, UF_QUERY);
     char *service   = port ? port : schema;
+    char *uri = malloc(strlen(url));
+    if (path != 0x00) {
+        strcat(uri, path); 
+    }
+    if (query != 0x00) {
+        strcat(uri, "?"); 
+        strcat(uri, query); 
+    }
 
     cfg.host = host;
     cfg.port = port;
@@ -32,18 +42,19 @@ int main(int argc, char **argv)
     
     uint64_t i = 0;
     for (i; i < cfg.threads; i ++) {
-        thread *t = &threads[i];
-        t->connections = cfg.connections / cfg.threads;
-        t->addr = server_addr_in;
-        t->host = host;
-        t->port = service;
-        t->start = time_us();
-        t->timeout = cfg.timeout;
+        thread *t       = &threads[i];
+        t->connections  = cfg.connections / cfg.threads;
+        t->addr         = server_addr_in;
+        t->host         = host;
+        t->port         = service;
+        t->uri          = uri;
+        t->start        = time_us();
+        t->timeout      = cfg.timeout;
         strcpy(t->params, cfg.data);
         if (pthread_create(&t->thread, NULL, &thread_main, t) != 0) {
             fprintf(stderr, "unabled to create thread: %"PRIu64" %s \n", i, strerror(errno));
             exit(2);
-        } 
+        }
     }
 
     uint64_t complete = 0;
@@ -56,10 +67,12 @@ int main(int argc, char **argv)
 
     printf("Benchmarking %s (be patient)\n", host);
 
-    uint64_t k, j = 0;
+    uint64_t m = 0, k, j = 0;
     long double socket_req_times = 0;
     long double thread_req_times = 0;
     uint64_t connect_times[cfg.connections];
+    uint64_t print_prethread = (uint64_t)(cfg.threads / 10);
+    /*printf("print_prethread: %"PRIu64" \n", print_prethread);*/
     for (j; j < cfg.threads; j++) {
         thread *t = &threads[j];
         pthread_join(t->thread, NULL);
@@ -81,7 +94,13 @@ int main(int argc, char **argv)
 
         complete += t->complete;
         bytes += t->bytes;
-        printf("Completed %"PRIu64" requests \n", complete);
+        /*printf("m: %"PRIu64" \n", m);*/
+        if (m >= print_prethread - 1) {
+            printf("Completed %"PRIu64" requests \n", complete);
+            m = 0;
+        } else {
+            m ++;
+        }
     }
     uint64_t runtime_us = time_us() - start;
     double runtime_s    = runtime_us / 1000000.000;

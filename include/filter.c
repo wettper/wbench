@@ -361,7 +361,9 @@ static int http_parser_parse_url(const char *buf, size_t buflen, int is_connect,
                 break;
 
             default:
-                assert(!"Unexpected state .");
+                /*assert(!"Unexpected state .");*/
+                usage();
+                exit(1);
         }
 
         if (uf == old_uf) {
@@ -425,7 +427,7 @@ void usage()
     printf("        -t, --threads       <N> Number of threads to use    \n");
     printf("                                                            \n");
     printf("        -d, --data          <H> Add data to request         \n");
-    printf("            --timeout       <T> Socket/request timeout      \n");
+    printf("        -T, --timeout       <T> Socket/request timeout      \n");
     printf("        -v, --version       Print version details           \n");
     printf("                                                            \n");
     printf(" Numeric arguments may include a SI unit (1k, 1M, 1G)       \n");
@@ -444,7 +446,7 @@ int parse_args(struct config *cfg, char **url, struct http_parser_url *parts,
     cfg->connections    = CONNECTIONS_DEFAULT;
     cfg->timeout        = SOCKET_TIMEOUT_DEFAULT;
 
-    while ((c = getopt_long(argc, argv, "t:c:d:T:v:h:?", longopts, NULL)) != -1) {
+    while ((c = getopt_long(argc, argv, "t:c:d:T:vh?", longopts, NULL)) != -1) {
         switch (c) {
             case 't':
                 if (scan_metric(optarg, &cfg->threads)) return -1;

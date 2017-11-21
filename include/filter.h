@@ -271,8 +271,8 @@ static const char tokens[256] = {
 static struct option longopts[] = {
     { "connections", required_argument, NULL, 'c' }
   , { "threads",     required_argument, NULL, 't' }
-  , { "header",      required_argument, NULL, 'H' }
-  , { "timeout",     required_argument, NULL, 'T' }
+  , { "data",        no_argument,       NULL, 'd' }
+  , { "timeout",     no_argument,       NULL, 'T' }
   , { "help",        no_argument,       NULL, 'h' }
   , { "version",     no_argument,       NULL, 'v' }
   , { NULL,          0,                 NULL, '0' }

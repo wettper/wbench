@@ -388,7 +388,9 @@ static int w_client_to_server(thread *threads)
 
     fd = socket(AI_FAMILY, AI_SOCKTYPE, AI_PROTOCOL);
     if (fd < 0) {
-        return -1;
+        threads->errors.connect ++;
+        printf("socket create faild \n");
+        return fd;
     }
 
     /*非阻塞*/
@@ -398,7 +400,8 @@ static int w_client_to_server(thread *threads)
     timeout = 0;
     while (connect(fd, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
         if (++timeout > threads->timeout) {
-            printf("connect timeout! \n");
+            threads->errors.connect ++;
+            /*printf("connect timeout \n");*/
             close(fd);
             return -1;
         }
@@ -410,11 +413,12 @@ static int w_client_to_server(thread *threads)
     build_shake_key(shake_key);
     /*协议包*/
     memset(shake_buf, 0, sizeof(shake_buf));
-    build_header(threads->host, threads->port, "/null", shake_key, (char *)shake_buf);
+    build_header(threads->host, threads->port, threads->uri, shake_key, (char *)shake_buf);
     /*发送协议包*/
     ret = send(fd, shake_buf, strlen((const char *)shake_buf), MSG_NOSIGNAL);
 
     /*握手*/
+    timeout = 0;
     while(true) {
         memset(buf, 0, sizeof(buf));
         ret = recv(fd, buf, sizeof(buf), MSG_NOSIGNAL);
@@ -439,7 +443,7 @@ static int w_client_to_server(thread *threads)
             }
         }
         if (++timeout > threads->timeout) {
-            printf("shake timeout! \n");
+            /*printf("shake timeout \n");*/
             threads->errors.connect ++;
             close(fd);
             return -1;
@@ -501,12 +505,12 @@ static int w_recv(int fd, uint8_t *data, uint32_t data_max_len)
             free(recv_buf);
             if(ret2 < 0) {
                 memset(data, 0, data_max_len);
-                strcpy(data, "connect false !\r\n");
-                return strlen("connect false !\r\n");
+                printf("connect false !\r\n");
+                return -1;
             }
             memset(data, 0, data_max_len);
-            strcpy(data, "connect ...\r\n");
-            return strlen("connect ...\r\n");
+            printf("retry connect ...\r\n");
+            return -1;
         }
 
         /*websocket数据打包*/
@@ -525,6 +529,7 @@ static int w_recv(int fd, uint8_t *data, uint32_t data_max_len)
             /*解析为数据包*/
             /*把解析得到的数据复制出去*/
             memcpy(data, websocket_package, ret_len);
+            strcpy(data, recv_buf);
             free(recv_buf);
             free(websocket_package);
             return ret_len;
@@ -546,6 +551,9 @@ int connect_socket(thread *threads, socket_info *socketinfo)
     char buf[RECVBUF] = {"\0"}, send_text[REQUBUF] = "wbench testing", *p;
 
     fd = w_client_to_server(threads);
+    if (fd < 0) {
+        return fd;
+    }
 
     socketinfo->fd = fd;
 
@@ -556,10 +564,16 @@ int connect_socket(thread *threads, socket_info *socketinfo)
     /*send(fd, send_text, strlen(send_text) + 1, 0);*/
     /*recv(fd, buf, RECVBUF, 0);*/
     ret = w_send(fd, send_text, strlen(send_text), true, WCT_TXTDATA);
+    timeout = 0;
     while (true) {
-        memset(buf, 0, sizeof(buf));
         ret = w_recv(fd, buf, sizeof(buf));
-        if (++timeout > threads->timeout) {
+        if (ret < 0) {
+            if (++timeout > threads->timeout) {
+                threads->errors.connect ++;
+                /*printf("recv message timeout \n");*/
+                break;
+            }
+        } else {
             break;
         }
         delayms(1);

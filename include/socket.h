@@ -1,6 +1,11 @@
 #ifndef SOCKET_H
 #define SOCKET_H
 
+#ifndef HAVE_STDLIB_H
+#define HAVE_STDLIB_H       1
+#include <stdlib.h>
+#endif
+
 #ifndef HAVE_STRING_H
 #define HAVE_STRING_H       1
 #include <string.h>
@@ -45,6 +50,7 @@ typedef struct thread {
     struct sockaddr_in addr;
     char     *host;
     char     *port;
+    char     *uri;
     char     params[REQUBUF];
     uint64_t timeout;
     uint64_t connections;
