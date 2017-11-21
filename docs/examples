@@ -1,3 +1,5 @@
 gcc -Iinclude -lpthread -g src/wbench.c include/*.c -o bin/wbench
 set args -c 10 -t 5 -d '{"type":"ping"}' websocket://127.0.0.1:7890
 
+gcc -Iinclude -lpthread -g src/wbench.c include/*.c -o bin/wbench && bin/wbench -c 10 -t 5 -d '{"type": "ping"}' websocket://127.0.0.1:7890
+

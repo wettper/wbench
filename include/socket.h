@@ -40,16 +40,42 @@ typedef struct socket_info {
     char buf[RECVBUF];
 } socket_info;
 
+typedef struct thread {
+    pthread_t thread;
+    struct sockaddr_in addr;
+    char     *host;
+    char     *port;
+    char     params[REQUBUF];
+    uint64_t timeout;
+    uint64_t connections;
+    uint64_t complete;
+    uint64_t requests;
+    uint64_t bytes;
+    uint64_t start;
+    uint64_t end;
+    struct socket_info *socket_info;
+    errors errors;
+} thread;
+
+
 //websocket根据data[0]判别数据包类型    比如0x81 = 0x80 | 0x1 为一个txt类型数据包
-typedef enum{
-    WCT_MINDATA = -20,      // 0x0：标识一个中间数据包
-    WCT_TXTDATA = -19,      // 0x1：标识一个txt类型数据包
-    WCT_BINDATA = -18,      // 0x2：标识一个bin类型数据包
-    WCT_DISCONN = -17,      // 0x8：标识一个断开连接类型数据包
-    WCT_PING = -16,     // 0x8：标识一个断开连接类型数据包
-    WCT_PONG = -15,     // 0xA：表示一个pong类型数据包
+typedef enum {
+    // 0x0：标识一个中间数据包
+    WCT_MINDATA = -20,
+    // 0x1：标识一个txt类型数据包
+    WCT_TXTDATA = -19,
+    // 0x2：标识一个bin类型数据包
+    WCT_BINDATA = -18,
+    // 0x8：标识一个断开连接类型数据包
+    WCT_DISCONN = -17,
+    // 0x8：标识一个断开连接类型数据包
+    WCT_PING = -16,
+    // 0xA：表示一个pong类型数据包
+    WCT_PONG = -15,
     WCT_ERR = -1,
     WCT_NULL = 0
 } w_com_type;
+
+int connect_socket(thread *threads, socket_info *socketinfo);
 
 #endif
