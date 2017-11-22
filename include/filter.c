@@ -362,6 +362,7 @@ static int http_parser_parse_url(const char *buf, size_t buflen, int is_connect,
 
             default:
                 /*assert(!"Unexpected state .");*/
+                printf("Please check url is legal, including the internet protocol[ws] \n\n");
                 usage();
                 exit(1);
         }
@@ -421,7 +422,7 @@ static int script_parse_url(char *url, struct http_parser_url *parts)
 /*参数说明*/
 void usage()
 {
-    printf("Usage: wbench <options> <url>                               \n");
+    printf("Usage: wbench <options> <url[ws://]>                      \n");
     printf("    Options:                                                \n");
     printf("        -c, --connection    <N> Connections to keep open    \n");
     printf("        -t, --threads       <N> Number of threads to use    \n");

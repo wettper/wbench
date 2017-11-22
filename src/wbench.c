@@ -17,7 +17,13 @@ int main(int argc, char **argv)
     char *port      = copy_url_part(url, &parts, UF_PORT);
     char *path      = copy_url_part(url, &parts, UF_PATH);
     char *query     = copy_url_part(url, &parts, UF_QUERY);
-    char *service   = port ? port : schema;
+    char *service   = port ? port : "80";
+    char *protocol  = schema ? schema : "ws";
+    if (protocol != "ws") {
+        printf("Please use the [ws] protocol for stress testing \n\n");
+        usage();
+        exit(1);
+    }
     char *uri = malloc(strlen(url));
     if (path != 0x00) {
         strcat(uri, path); 
@@ -27,8 +33,9 @@ int main(int argc, char **argv)
         strcat(uri, query); 
     }
 
-    cfg.host = host;
-    cfg.port = port;
+    cfg.host        = host;
+    cfg.port        = service;
+    cfg.protocol    = protocol;
 
     signal(SIGPIPE, SIG_IGN);
 
@@ -45,6 +52,7 @@ int main(int argc, char **argv)
         thread *t       = &threads[i];
         t->connections  = cfg.connections / cfg.threads;
         t->addr         = server_addr_in;
+        t->protocol     = protocol;
         t->host         = host;
         t->port         = service;
         t->uri          = uri;
@@ -114,7 +122,7 @@ int main(int argc, char **argv)
     printf("\n");
 
     printf("Server Hostname: %16s \n", host);
-    printf("Server Port: %15s \n", port);
+    printf("Server Port: %15s \n", service);
     printf("\n");
 
     printf("Document Length: \t%"PRIu64" bytes\n", bytes);

@@ -39,6 +39,7 @@ static struct config {
     uint64_t threads;
     uint64_t timeout;
     char     data[REQUBUF];
+    char     *protocol;
     char     *host;
     char     *port;
 } cfg;

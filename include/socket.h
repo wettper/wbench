@@ -48,6 +48,7 @@ typedef struct socket_info {
 typedef struct thread {
     pthread_t thread;
     struct sockaddr_in addr;
+    char     *protocol;
     char     *host;
     char     *port;
     char     *uri;
