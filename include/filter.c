@@ -18,7 +18,7 @@ static int scan_units(char *s, uint64_t *n, units *m)
     char unit[3] = { 0, 0, 0 };
     int i, c;
 
-    if ((c = sscanf(s, "%d %2s", &base, unit)) < 1) {
+    if ((c = sscanf(s, "%"PRIu64" %2s", &base, unit)) < 1) {
         return -1;
     }
 
