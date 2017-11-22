@@ -1,6 +1,6 @@
 # wbench  [![Build Status](http://www.web-lovers.com/assets/bimg/build_passing.png)](http://www.web-lovers.com/)
 
-**wbench**, Dedicated to stress testing that supports all web services.
+**wbench**, Dedicated to stress testing that supports ws services.
 
 ## Build
 
@@ -20,7 +20,6 @@ A quick checklist:
 ## Features
 
 + Support websocket stress test.
-+ Support http(s) stress test.
 
 ## Help
 
