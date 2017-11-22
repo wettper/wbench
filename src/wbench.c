@@ -19,7 +19,7 @@ int main(int argc, char **argv)
     char *query     = copy_url_part(url, &parts, UF_QUERY);
     char *service   = port ? port : "80";
     char *protocol  = schema ? schema : "ws";
-    if (protocol != "ws") {
+    if (strcmp(protocol, "ws") != 0) {
         printf("Please use the [ws] protocol for stress testing \n\n");
         usage();
         exit(1);
