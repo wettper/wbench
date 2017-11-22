@@ -6,5 +6,4 @@ wbench_LDADD = $(top_srcdir)/include/libfilter.a\
 			  	$(top_srcdir)/include/libsocket.a\
 			   	$(top_srcdir)/include/libstats.a\
 			   	$(top_srcdir)/include/libthread.a
-include_HEADERS = $(top_srcdir)/include/wbench.h
 LIBS= -l pthread
