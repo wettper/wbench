@@ -1,4 +1,4 @@
-# wbench (nutcracker) [![Build Status](http://www.web-lovers.com/assets/bimg/build_passing.png)](http://www.web-lovers.com/)
+# wbench  [![Build Status](http://www.web-lovers.com/assets/bimg/build_passing.png)](http://www.web-lovers.com/)
 
 **wbench**, Dedicated to stress testing that supports all web services.
 
