@@ -17,16 +17,16 @@
 
 #define SOCKET_SHAKE_KEY_LEN    16 
 
-//typedef unsigned char       uint8_t;
-//typedef unsigned short int  uint16_t;
-//typedef unsigned int        uint32_t;
-//#if __WORDSIZE == 64
-//typedef unsigned long int   uint64_t;
-//#elif __WORDSIZE == 32
-//typedef unsigned long long int  uint64_t;
-//#else
-//typedef unsigned long int   uint64_t;
-//#endif
+typedef unsigned char       uint8_t;
+typedef unsigned short int  uint16_t;
+typedef unsigned int        uint32_t;
+#if __WORDSIZE == 64
+typedef unsigned long int   uint64_t;
+#elif __WORDSIZE == 32
+typedef unsigned long long int  uint64_t;
+#else
+typedef unsigned long int   uint64_t;
+#endif
 
 typedef int bool;
 #define true 1
