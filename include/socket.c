@@ -449,9 +449,8 @@ static int w_client_to_server(thread *threads)
             return -1;
         }
         delayms(1);
-
-        return -1;
     }
+    return -1;
 }
 
 /**
@@ -529,7 +528,7 @@ static int w_recv(int fd, uint8_t *data, uint32_t data_max_len)
             /*解析为数据包*/
             /*把解析得到的数据复制出去*/
             memcpy(data, websocket_package, ret_len);
-            strcpy(data, recv_buf);
+            strncpy(data, recv_buf, strlen(data));
             free(recv_buf);
             free(websocket_package);
             return ret_len;
