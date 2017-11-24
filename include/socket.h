@@ -11,9 +11,19 @@
 #include <string.h>
 #endif
 
+#ifndef HAVE_ERRNO_H
+#define HAVE_ERRNO_H        1
+#include <errno.h>
+#endif
+
 #ifndef HAVE_FCNTL_H
 #define HAVE_FCNTL_H        1
 #include <fcntl.h>
+#endif
+
+#ifndef HAVE_NETDB_H
+#define HAVE_NETDB_H        1
+#include <netdb.h>
 #endif
 
 #ifndef HAVE_SYS_SOCKET_H
@@ -84,5 +94,7 @@ typedef enum {
 } w_com_type;
 
 int connect_socket(thread *threads, socket_info *socketinfo);
+
+void get_host_by_name(char **host);
 
 #endif

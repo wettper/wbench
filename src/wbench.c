@@ -32,6 +32,7 @@ int main(int argc, char **argv)
         strcat(uri, "?"); 
         strcat(uri, query); 
     }
+    get_host_by_name(&host);
 
     cfg.host        = host;
     cfg.port        = service;
@@ -121,8 +122,8 @@ int main(int argc, char **argv)
     printf("\n");
     printf("\n");
 
-    printf("Server Hostname: %16s \n", host);
-    printf("Server Port: %15s \n", service);
+    printf("Server Hostname: \t%s \n", host);
+    printf("Server Port: \t\t%s \n", service);
     printf("\n");
 
     printf("Document Length: \t%"PRIu64" bytes\n", bytes);
@@ -132,7 +133,11 @@ int main(int argc, char **argv)
     printf("Time taken for tests: \t%.3f seconds \n", runtime_s);
     printf("Complete requests: \t%"PRIu64" \n", complete);
 
-    printf("Failed requests: \t%"PRIu32" \n", errors.connect);
+    if (bytes == 0) {
+        printf("Failed requests: \t%"PRIu32" \n", complete);
+    } else {
+        printf("Failed requests: \t%"PRIu32" \n", errors.connect);
+    }
     printf("Write errors: \t\t%"PRIu32" \n", errors.write);
     printf("Total transferred: \t%"PRIu32" bytes \n", bytes);
     printf("Requests per second: \t%.3f [#/sec] (mean) \n", req_per_s);

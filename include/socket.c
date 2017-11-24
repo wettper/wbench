@@ -587,3 +587,14 @@ int connect_socket(thread *threads, socket_info *socketinfo)
 
     return fd;
 }
+
+
+void get_host_by_name(char **host)
+{
+    struct hostent *hostinfo = gethostbyname(*host);
+    int i = 0;
+    for (i; hostinfo->h_addr_list[i]; i++) {
+        /*printf("IP addr %d: %s \n", i + 1, inet_ntoa(*(struct in_addr*)hostinfo->h_addr_list[i]));*/
+        strcpy(*host, inet_ntoa(*(struct in_addr*)hostinfo->h_addr_list[i]));
+    }
+}
