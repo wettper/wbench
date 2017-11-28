@@ -1,5 +1,6 @@
 [to be solved]
 1. 服务端因为缓冲区占满分批发送问题和服务端因为包太小一次发送多条的情况
+2. support wss
 
 [2017-11-24 13:27:00]
 convert domain name to IP address
