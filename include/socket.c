@@ -214,12 +214,13 @@ static int w_enpackage(uint8_t *data, uint32_t data_len, uint8_t *package, uint3
  * @param uint8_t   *package        解包后存储地址
  * @param uint32_t  package_max_len 存储地址可用长度
  * @param uint32_t  *package_len    解包所得长度
+ * @param uint32_t  *one_package_len本次包的长度（主要针对粘包问题）
  *
  * @return int      解包识别的数据类型 如 : txt数据, bin数据, ping, pong等
  *
  */
 int w_depackage(uint8_t *data, uint32_t data_len, uint8_t *package, uint32_t package_max_len, 
-        uint32_t *package_len)
+        uint32_t *package_len, uint32_t *one_package_len)
 {
     /*掩码*/
     uint8_t mask_key[4] = {0};
@@ -337,9 +338,10 @@ int w_depackage(uint8_t *data, uint32_t data_len, uint8_t *package, uint32_t pac
     } else {
         /*解包数据没使用掩码, 直接复制数据段*/
         memcpy(package, &data[data_start], len);
-        package[len] = '\0';
+        /*package[len] = '\0';*/
     }
     *package_len = len;
+    *one_package_len = data_start + len;
     return ret;
 }
 
@@ -491,7 +493,7 @@ static int w_send(int fd, uint8_t *data, uint32_t data_len, bool mod, w_com_type
  */
 static int w_recv(int fd, uint8_t *data, uint32_t data_max_len)
 {
-    uint8_t *websocket_package, *recv_buf;
+    uint8_t *websocket_package, *recv_buf, *temp;
     int ret, ret2 = 0;
     uint32_t ret_len = 0;
 
@@ -512,29 +514,45 @@ static int w_recv(int fd, uint8_t *data, uint32_t data_max_len)
             return -1;
         }
 
-        /*websocket数据打包*/
-        websocket_package = (uint8_t *)calloc(1, sizeof(char)*(ret + 128));
-        memset(websocket_package, 0, (ret + 128));
-        ret2 = w_depackage(recv_buf, ret, websocket_package, (ret + 128), &ret_len);
-        /*解析为ping包, 自动回pong*/
-        if(ret2 == WCT_PING && ret_len > 0) {
-            w_send(fd, websocket_package, ret_len, true, WCT_PONG);
-            /*显示数据*/
-            printf("webSocket_recv : PING %d\r\n%s\r\n" , ret_len, websocket_package); 
-            free(recv_buf);
-            free(websocket_package);
-            return WCT_NULL;
-        } else if(ret_len > 0 && (ret2 == WCT_TXTDATA || ret2 == WCT_BINDATA || ret2 == WCT_MINDATA)) {
-            /*解析为数据包*/
-            /*把解析得到的数据复制出去*/
-            memcpy(data, websocket_package, ret_len);
-            strncpy(data, recv_buf, strlen(data));
-            free(recv_buf);
-            free(websocket_package);
-            return ret_len;
+        uint32_t remain_len = ret, one_package_len = 0;
+        while (remain_len > 0) {
+            /*websocket数据打包*/
+            websocket_package = (uint8_t *)calloc(1, sizeof(char)*(ret + 128));
+            memset(websocket_package, 0, (ret + 128));
+            ret2 = w_depackage(recv_buf, ret, websocket_package, (ret + 128), &ret_len, &one_package_len);
+            /*解析为ping包, 自动回pong*/
+            if(ret2 == WCT_PING && ret_len > 0) {
+                w_send(fd, websocket_package, ret_len, true, WCT_PONG);
+                /*显示数据*/
+                printf("webSocket_recv : PING %d\r\n%s\r\n" , ret_len, websocket_package); 
+                free(recv_buf);
+                free(websocket_package);
+                free(temp);
+                return WCT_NULL;
+            } else if(ret_len > 0 && (ret2 == WCT_TXTDATA || ret2 == WCT_BINDATA || ret2 == WCT_MINDATA)) {
+                /*解析为数据包*/
+                strcat(data, websocket_package);
+                remain_len -= one_package_len;
+                if (remain_len <= 0) {
+                    free(recv_buf);
+                    free(websocket_package);
+                    free(temp);
+                    return ret_len;
+                } else {
+                    temp = (uint8_t *)calloc(1, remain_len);
+                    memset(temp, 0, remain_len);
+                    strncpy(temp, recv_buf + one_package_len, remain_len);
+
+                    recv_buf = (uint8_t *)calloc(1, remain_len);
+                    memset(recv_buf, 0, remain_len);
+                    strncpy(recv_buf, temp, strlen(temp));
+                    ret = remain_len;
+                }
+            }
         }
         free(recv_buf);
         free(websocket_package);
+        free(temp);
         return -ret;
     } else {
         free(recv_buf);
