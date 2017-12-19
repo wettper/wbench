@@ -1,5 +1,1 @@
-autoscan && aclocal && autoconf && autoheader && automake --add-missing && ./configure && make
-
-gcc -Iinclude -lpthread -g src/wbench.c include/*.c -o bin/wbench && bin/wbench -c 10 -t 5 -d 'param1=1&param2=2' ws://127.0.0.1:7890
-
-
+wbench -c 10 -t 5 -d 'param1=1&param2=2' ws://127.0.0.1:7890
