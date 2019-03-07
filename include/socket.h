@@ -62,7 +62,7 @@ typedef struct thread {
     char     *host;
     char     *port;
     char     *uri;
-    char     params[REQUBUF];
+    char     *script;
     uint64_t timeout;
     uint64_t connections;
     uint64_t complete;
@@ -71,6 +71,7 @@ typedef struct thread {
     uint64_t start;
     uint64_t end;
     struct socket_info *socket_info;
+    struct data_queue *params;
     errors errors;
 } thread;
 
@@ -93,7 +94,7 @@ typedef enum {
     WCT_NULL = 0
 } w_com_type;
 
-int connect_socket(thread *threads, socket_info *socketinfo);
+uint16_t connect_socket(thread *threads, socket_info *socketinfo);
 
 void get_host_by_name(char **host);
 

@@ -40,9 +40,23 @@ static struct config {
     uint64_t threads;
     uint64_t timeout;
     char     data[REQUBUF];
+    char     *file;
+    char     *script;
     char     *protocol;
     char     *host;
     char     *port;
 } cfg;
+
+//发送测试消息的队列
+typedef struct data_queue {
+    uint64_t len;
+    struct queue_node *head;
+    struct queue_node *tail;
+} data_queue;
+typedef struct queue_node {
+    char data[REQUBUF];
+    struct queue_node *next;
+    struct queue_node *prev;
+} queue_node;
 
 #endif  /*CONFIG_H*/

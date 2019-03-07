@@ -243,7 +243,7 @@ static void sha1_pad_message(sha1_context *context)
     sha1_process_message_block(context);
 } 
 
-static int sha1_result(sha1_context *context)
+static uint16_t sha1_result(sha1_context *context)
 {
     if (context->corrupted) {
         return 0;

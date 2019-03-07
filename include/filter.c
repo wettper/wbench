@@ -12,7 +12,7 @@ units time_units_s = {
     .units = { "m", "h", NULL }
 };
 
-static int scan_units(char *s, uint64_t *n, units *m)
+static uint16_t scan_units(char *s, uint64_t *n, units *m)
 {
     uint64_t base, scale = 1;
     char unit[3] = { 0, 0, 0 };
@@ -33,12 +33,12 @@ static int scan_units(char *s, uint64_t *n, units *m)
     return 0;
 }
 
-static int scan_metric(char *s, uint64_t *n)
+static uint16_t scan_metric(char *s, uint64_t *n)
 {
     return scan_units(s, n, &metric_units);
 }
 
-static int scan_time(char *s, uint64_t *n)
+static uint16_t scan_time(char *s, uint64_t *n)
 {
     return scan_units(s, n, &time_units_s);
 }
@@ -228,7 +228,7 @@ static enum http_host_state http_parse_host_char(enum http_host_state s, const c
 }
 
 
-static int http_parse_host(const char * buf, struct http_parser_url *u, int found_at)
+static uint16_t http_parse_host(const char * buf, struct http_parser_url *u, int found_at)
 {
     enum http_host_state s;
 
@@ -311,7 +311,7 @@ static int http_parse_host(const char * buf, struct http_parser_url *u, int foun
     return 0;
 }
 
-static int http_parser_parse_url(const char *buf, size_t buflen, int is_connect, 
+static uint16_t http_parser_parse_url(const char *buf, size_t buflen, int is_connect, 
         struct http_parser_url *u)
 {
     enum state s;
@@ -408,7 +408,7 @@ static int http_parser_parse_url(const char *buf, size_t buflen, int is_connect,
 }
 
 
-static int script_parse_url(char *url, struct http_parser_url *parts)
+static uint16_t script_parse_url(char *url, struct http_parser_url *parts)
 {
     if (!http_parser_parse_url(url, strlen(url), 0, parts)) {
         if (!(parts->field_set & (1 << UF_SCHEMA))) return 0;
@@ -422,21 +422,27 @@ static int script_parse_url(char *url, struct http_parser_url *parts)
 /*参数说明*/
 void usage()
 {
-    printf("Usage: wbench <options> <url[ws://]>                      \n");
-    printf("    Options:                                                \n");
-    printf("        -c, --connection    <N> Connections to keep open    \n");
-    printf("        -t, --threads       <N> Number of threads to use    \n");
-    printf("                                                            \n");
-    printf("        -d, --data          <H> Add data to request         \n");
-    printf("        -T, --timeout       <T> Socket/request timeout      \n");
-    printf("        -v, --version       Print version details           \n");
-    printf("                                                            \n");
-    printf(" Numeric arguments may include a SI unit (1k, 1M, 1G)       \n");
-    printf(" Time arguments may include a time unit (2s, 2m, 2h)        \n");
+    printf("Usage: wbench <options> <url[ws://]>                                 \n");
+    printf("    Options:                                                         \n");
+    printf("        -c, --connection    <N> Connections to keep open             \n");
+    printf("        -t, --threads       <N> Number of threads to use             \n");
+    printf("                                                                     \n");
+    printf("        -d, --data          <H> Add data to request                  \n");
+    printf("        -f, --file          <H> Add a request data file, number      \n");
+    printf("                                of data lines < 512                  \n");
+    printf("        -s, --script        <H> Add a script to run the bench        \n");
+    printf("                        The priority order of passing test data      \n");
+    printf("                        parameters is: --data < --file < --script    \n");
+    printf("                                                                     \n");
+    printf("        -T, --timeout       <T> Socket/request timeout               \n");
+    printf("        -v, --version       Print version details                    \n");
+    printf("                                                                     \n");
+    printf(" Numeric arguments may include a SI unit (1k, 1M, 1G)                \n");
+    printf(" Time arguments may include a time unit (2s, 2m, 2h)                 \n");
 }
 
 /*参数过滤*/
-int parse_args(struct config *cfg, char **url, struct http_parser_url *parts, 
+uint16_t parse_args(struct config *cfg, char **url, struct http_parser_url *parts, 
         int argc, char **argv)
 {
     int c;
@@ -447,7 +453,7 @@ int parse_args(struct config *cfg, char **url, struct http_parser_url *parts,
     cfg->connections    = CONNECTIONS_DEFAULT;
     cfg->timeout        = SOCKET_TIMEOUT_DEFAULT;
 
-    while ((c = getopt_long(argc, argv, "t:c:d:T:vh?", longopts, NULL)) != -1) {
+    while ((c = getopt_long(argc, argv, "t:c:d:f:s:T:vh?", longopts, NULL)) != -1) {
         switch (c) {
             case 't':
                 if (scan_metric(optarg, &cfg->threads)) return -1;
@@ -457,6 +463,12 @@ int parse_args(struct config *cfg, char **url, struct http_parser_url *parts,
                 break;
             case 'd':
                 strcpy(cfg->data, optarg);
+                break;
+            case 'f':
+                cfg->file = optarg;
+                break;
+            case 's':
+                cfg->script = optarg;
                 break;
             case 'T':
                 if (scan_time(optarg, &cfg->timeout)) return -1;
@@ -505,5 +517,40 @@ char *copy_url_part(char *url, struct http_parser_url *parts,
     }
 
     return part;
+}
+
+uint16_t populate_data_queue(struct data_queue *queue, struct config *cfg)
+{
+    if (cfg->file) {
+        FILE *fp = fopen(cfg->file,"r");
+        char line[REQUBUF];
+        while(fgets(line, REQUBUF, fp) != NULL) {
+
+            if (line[0] == '\n' || line[0] == '\0') continue;
+            
+            queue_node *node    = calloc(1, sizeof(queue_node));
+            queue->len ++;
+            strcpy(node->data, line); 
+
+            if (queue->len == 1) {
+                queue->head = queue->tail = node;
+            } else {
+                node->prev = queue->tail;
+                queue->tail->next = node;
+            }
+            queue->tail         = node;
+        }
+        fclose(fp);
+        return queue->len;
+    } else if (cfg->data != '\0') {
+        queue_node *node = calloc(1, sizeof(queue_node));
+        strcpy(cfg->data, node->data); 
+        queue->len  = 1;
+        queue->head = node;
+        queue->tail = node;
+        return queue->len;
+    }
+    
+    return -1;
 }
 

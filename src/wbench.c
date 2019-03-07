@@ -6,7 +6,6 @@ int main(int argc, char **argv)
     char *url = calloc(argc, sizeof(char *));
     struct http_parser_url parts = {};
 
-    /*参数过滤*/
     if (parse_args(&cfg, &url, &parts, argc, argv))  {
         usage();
         exit(1);
@@ -47,11 +46,20 @@ int main(int argc, char **argv)
     server_addr_in.sin_family = AI_FAMILY;
     server_addr_in.sin_port = htons(atoi(service));
     inet_pton(AF_INET, host, &server_addr_in.sin_addr);
+
+    data_queue *queue = calloc(1, sizeof(data_queue));
+    if (!cfg.script) {
+        if (!populate_data_queue(queue, &cfg)) {
+            printf("Please pass valid test data by [-d|-f] \n\n");
+            exit(1);
+        }
+    }
     
     uint64_t i = 0;
     for (i; i < cfg.threads; i ++) {
         thread *t       = &threads[i];
         t->connections  = cfg.connections / cfg.threads;
+        t->script       = cfg.script;
         t->addr         = server_addr_in;
         t->protocol     = protocol;
         t->host         = host;
@@ -59,7 +67,7 @@ int main(int argc, char **argv)
         t->uri          = uri;
         t->start        = time_us();
         t->timeout      = cfg.timeout;
-        strcpy(t->params, cfg.data);
+        t->params       = queue;
         if (pthread_create(&t->thread, NULL, &thread_main, t) != 0) {
             fprintf(stderr, "unabled to create thread: %"PRIu64" %s \n", i, strerror(errno));
             exit(2);

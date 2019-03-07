@@ -288,10 +288,12 @@ typedef struct {
 void usage();
 
 /*参数过滤*/
-int parse_args(struct config *cfg, char **url, struct http_parser_url *parts, 
+uint16_t parse_args(struct config *cfg, char **url, struct http_parser_url *parts, 
         int argc, char **argv);
 
 char *copy_url_part(char *url, struct http_parser_url *parts, 
         enum http_parser_user_fields field);
+
+uint16_t populate_data_queue(struct data_queue *queue, struct config *cfg);
 
 #endif  /*FILTER_H*/

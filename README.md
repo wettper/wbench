@@ -29,6 +29,12 @@ A quick checklist:
         -t, --threads       <N> Number of threads to use
 
         -d, --data          <H> Add data to request
+        -f, --file          <H> Add a request data file, number 
+                                of data lines < 512
+        -s, --script        <H> Add a script to run the bench        
+                        The priority order of passing test data 
+                        parameters is: --data < --file < --script
+
         -T, --timeout       <T> Socket/request timeout
         -v, --version       Print version details
 

@@ -43,7 +43,7 @@ static int build_respon_shake_key(uint8_t *accept_key, uint32_t accept_key_len, 
     return n;
 }
 
-static int match_shake_key(uint8_t *my_key, uint32_t my_key_len, uint8_t *accept_key, 
+static uint16_t match_shake_key(uint8_t *my_key, uint32_t my_key_len, uint8_t *accept_key, 
         uint32_t accept_key_len)
 {
     int ret_len;
@@ -380,7 +380,7 @@ int w_server_to_client(int fd, char *recv_buf, uint32_t buf_len)
 }
 
 /*客户端连接服务端握手处理*/
-static int w_client_to_server(thread *threads)
+static uint16_t w_client_to_server(thread *threads)
 {
     struct sockaddr_in addr = threads->addr;
     int fd, ret, timeout;
@@ -527,7 +527,6 @@ static int w_recv(int fd, uint8_t *data, uint32_t data_max_len)
                 printf("webSocket_recv : PING %d\r\n%s\r\n" , ret_len, websocket_package); 
                 free(recv_buf);
                 free(websocket_package);
-                free(temp);
                 return WCT_NULL;
             } else if(ret_len > 0 && (ret2 == WCT_TXTDATA || ret2 == WCT_BINDATA || ret2 == WCT_MINDATA)) {
                 /*解析为数据包*/
@@ -536,7 +535,6 @@ static int w_recv(int fd, uint8_t *data, uint32_t data_max_len)
                 if (remain_len <= 0) {
                     free(recv_buf);
                     free(websocket_package);
-                    free(temp);
                     return ret_len;
                 } else {
                     temp = (uint8_t *)calloc(1, remain_len);
@@ -547,12 +545,12 @@ static int w_recv(int fd, uint8_t *data, uint32_t data_max_len)
                     memset(recv_buf, 0, remain_len);
                     strncpy(recv_buf, temp, strlen(temp));
                     ret = remain_len;
+                    free(temp);
                 }
             }
         }
         free(recv_buf);
         free(websocket_package);
-        free(temp);
         return -ret;
     } else {
         free(recv_buf);
@@ -560,12 +558,12 @@ static int w_recv(int fd, uint8_t *data, uint32_t data_max_len)
     }
 }
 
-int connect_socket(thread *threads, socket_info *socketinfo)
+uint16_t connect_socket(thread *threads, socket_info *socketinfo)
 {
     threads->complete ++;
 
     int fd, ret, timeout;
-    char buf[RECVBUF] = {"\0"}, send_text[REQUBUF] = "wbench testing", *p;
+    char buf[RECVBUF] = {"\0"}, send_text[REQUBUF], *p;
 
     fd = w_client_to_server(threads);
     if (fd < 0) {
@@ -574,35 +572,36 @@ int connect_socket(thread *threads, socket_info *socketinfo)
 
     socketinfo->fd = fd;
 
-    if (threads->params[0] != '\0') {
-        strcpy(send_text, threads->params); 
-    }
+    queue_node *node = threads->params->head;
+    while (node) {
+        strcpy(send_text, node->data); 
+        node = node->next;
 
-    /*send(fd, send_text, strlen(send_text) + 1, 0);*/
-    /*recv(fd, buf, RECVBUF, 0);*/
-    ret = w_send(fd, send_text, strlen(send_text), true, WCT_TXTDATA);
-    timeout = 0;
-    while (true) {
-        ret = w_recv(fd, buf, sizeof(buf));
-        if (ret < 0) {
-            if (++timeout > threads->timeout) {
-                threads->errors.connect ++;
-                /*printf("recv message timeout \n");*/
+        /*send(fd, send_text, strlen(send_text) + 1, 0);*/
+        /*recv(fd, buf, RECVBUF, 0);*/
+        ret = w_send(fd, send_text, strlen(send_text), true, WCT_TXTDATA);
+        timeout = 0;
+        while (true) {
+            ret = w_recv(fd, buf, sizeof(buf));
+            if (ret < 0) {
+                if (++timeout > threads->timeout) {
+                    threads->errors.connect ++;
+                    /*printf("recv message timeout \n");*/
+                    break;
+                }
+            } else {
                 break;
             }
-        } else {
-            break;
+            delayms(1);
         }
-        delayms(1);
+
+        strcpy(socketinfo->buf, buf);
+
+        threads->requests ++;
+        threads->bytes += strlen(buf);
     }
 
     close(fd);
-
-    strcpy(socketinfo->buf, buf);
-
-    threads->requests ++;
-    threads->bytes += strlen(buf);
-
     return fd;
 }
 
